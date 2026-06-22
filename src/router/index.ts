@@ -28,7 +28,26 @@ const router = createRouter({
         {
           path: 'admin/books',
           name: 'admin-books',
-          component: () => import('../views/admin/ManageBooks.vue')
+          component: () => import('../views/admin/ManageBooks.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'admin/users',
+          name: 'admin-users',
+          component: () => import('../views/admin/Users.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'admin/reports',
+          name: 'admin-reports',
+          component: () => import('../views/admin/Reports.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'admin/activity',
+          name: 'admin-activity',
+          component: () => import('../views/admin/Activity.vue'),
+          meta: { requiresAdmin: true }
         }
       ]
     },
@@ -40,23 +59,52 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/auth/Login.vue')
+      component: () => import('../views/auth/Login.vue'),
+      meta: { public: true }
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('../views/auth/ResetPassword.vue'),
+      meta: { public: true }
     }
   ]
 })
 
 router.beforeEach(async (to, _from, next) => {
   const { data: { session } } = await supabase.auth.getSession()
-  
   const isAuthenticated = !!session
-  
-  if (to.name !== 'login' && !isAuthenticated) {
-    next({ name: 'login' })
-  } else if (to.name === 'login' && isAuthenticated) {
-    next({ name: 'dashboard' })
-  } else {
-    next()
+
+  // Always allow public routes
+  if (to.meta.public) {
+    // If already logged in and trying to go to /login, redirect to dashboard
+    if (to.name === 'login' && isAuthenticated) {
+      return next({ name: 'dashboard' })
+    }
+    return next()
   }
+
+  // Require authentication for everything else
+  if (!isAuthenticated) {
+    return next({ name: 'login' })
+  }
+
+  // Admin-only routes
+  if (to.meta.requiresAdmin) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session?.user.id)
+      .single()
+
+    if (profile?.role === 'admin') {
+      return next()
+    } else {
+      return next({ name: 'dashboard' })
+    }
+  }
+
+  next()
 })
 
 export default router

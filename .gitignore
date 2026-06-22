@@ -27,3 +27,15 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Media & Uploads
+*.pdf
+*.mp4
+*.webm
+*.mov
+uploads/
+.temp/
+.tmp/
+
+# IDE & AI Tooling
+.gemini/

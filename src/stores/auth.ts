@@ -1,57 +1,113 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { supabase } from '../services/supabase'
 import type { User } from '@supabase/supabase-js'
 
+export interface UserProfile {
+  id: string
+  name: string | null
+  employee_id: string | null
+  department: string | null
+  title: string | null
+  role: 'admin' | 'employee'
+  created_at: string
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const role = ref<'admin' | 'employee' | null>(null)
+  const profile = ref<UserProfile | null>(null)
   const loading = ref(true)
+
+  const role = computed(() => profile.value?.role ?? null)
+  const displayName = computed(() => profile.value?.name || user.value?.email || 'User')
+  const greetingName = computed(() => {
+    if (profile.value?.name) {
+      return profile.value.name.trim().split(' ')[0]
+    }
+    if (user.value?.email) {
+      return user.value.email.split('@')[0]
+    }
+    return 'User'
+  })
+  const initials = computed(() => {
+    const name = displayName.value
+    const parts = name.trim().split(' ')
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    return name.substring(0, 2).toUpperCase()
+  })
 
   async function initializeAuth() {
     loading.value = true
     const { data } = await supabase.auth.getSession()
     if (data.session) {
       user.value = data.session.user
-      await fetchRole(data.session.user.id)
+      await fetchProfile(data.session.user.id)
     }
-    
+
     supabase.auth.onAuthStateChange(async (_event, session) => {
       user.value = session?.user || null
       if (user.value) {
-        await fetchRole(user.value.id)
+        await fetchProfile(user.value.id)
       } else {
-        role.value = null
+        profile.value = null
       }
     })
     loading.value = false
   }
 
-  async function fetchRole(userId: string) {
+  async function fetchProfile(userId: string) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('role')
+      .select('*')
       .eq('id', userId)
       .single()
-      
+
     if (data && !error) {
-      role.value = data.role as 'admin' | 'employee'
+      profile.value = data as UserProfile
     } else {
-      role.value = 'employee' // default fallback
+      // Fallback profile with default employee role
+      profile.value = {
+        id: userId,
+        name: user.value?.user_metadata?.name || null,
+        employee_id: null,
+        department: null,
+        title: null,
+        role: 'employee',
+        created_at: new Date().toISOString()
+      }
     }
   }
 
   async function logout() {
     await supabase.auth.signOut()
     user.value = null
-    role.value = null
+    profile.value = null
+  }
+
+  async function updatePassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+  }
+
+  async function resetPasswordForEmail(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    })
+    if (error) throw error
   }
 
   return {
     user,
+    profile,
     role,
+    displayName,
+    greetingName,
+    initials,
     loading,
     initializeAuth,
-    logout
+    fetchProfile,
+    logout,
+    updatePassword,
+    resetPasswordForEmail
   }
 })

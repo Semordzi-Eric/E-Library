@@ -3,17 +3,18 @@
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-text-main">Company Library</h2>
       <div class="flex items-center gap-3">
-        <select class="border border-gray-300 rounded-lg text-sm py-2 px-3 bg-surface focus:ring-primary focus:border-primary">
-          <option>All Categories</option>
-          <option>Leadership</option>
-          <option>HR Policies</option>
-          <option>Compliance</option>
-          <option>Technology</option>
+        <select v-model="selectedCategory" class="border border-gray-300 rounded-lg text-sm py-2 px-3 bg-surface focus:ring-primary focus:border-primary">
+          <option value="">All Categories</option>
+          <option value="Leadership">Leadership</option>
+          <option value="HR Policies">HR Policies</option>
+          <option value="Compliance">Compliance</option>
+          <option value="Technology">Technology</option>
+          <option value="Finance">Finance</option>
         </select>
-        <select class="border border-gray-300 rounded-lg text-sm py-2 px-3 bg-surface focus:ring-primary focus:border-primary">
-          <option>Most Recent</option>
-          <option>Most Popular</option>
-          <option>Alphabetical</option>
+        <select v-model="selectedSort" class="border border-gray-300 rounded-lg text-sm py-2 px-3 bg-surface focus:ring-primary focus:border-primary">
+          <option value="recent">Most Recent</option>
+          <option value="popular">Most Popular</option>
+          <option value="alpha">Alphabetical</option>
         </select>
       </div>
     </div>
@@ -30,41 +31,110 @@
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-      <BookCard 
-        v-for="book in mockBooks" 
-        :key="book.id" 
-        :book="book" 
-        @click="openReader(book.id)"
-      />
+    <div v-else-if="filteredBooks.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
+      <p class="text-lg">No books found.</p>
+    </div>
+
+    <div v-else class="space-y-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <BookCard 
+          v-for="book in filteredBooks" 
+          :key="book.id" 
+          :book="book" 
+          @click="openReader(book.id)"
+        />
+      </div>
+
+      <div v-if="hasMore" class="flex justify-center pt-6">
+        <button 
+          @click="fetchBooks(true)" 
+          :disabled="loadingMore"
+          class="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors"
+        >
+          {{ loadingMore ? 'Loading...' : 'Load More Books' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BookCard from '../../components/library/BookCard.vue'
+import { supabase } from '../../services/supabase'
+import { useLibraryStore } from '../../stores/library'
+import { useToastStore } from '../../stores/toast'
 
 const router = useRouter()
+const libraryStore = useLibraryStore()
+const toastStore = useToastStore()
+
 const loading = ref(true)
+const loadingMore = ref(false)
+const books = ref<any[]>([])
+const hasMore = ref(true)
+const page = ref(0)
+const PAGE_SIZE = 50
 
-// Mock Data to visualize the layout until Supabase is populated
-const mockBooks = ref([
-  { id: '1', title: 'The Effective Executive', author: 'Peter F. Drucker', category: 'Leadership', cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400' },
-  { id: '2', title: '2026 Employee Handbook', author: 'Human Resources', category: 'HR Policies', cover_url: 'https://images.unsplash.com/photo-1554774853-719586f82d77?w=400' },
-  { id: '3', title: 'Cybersecurity Best Practices', author: 'IT Department', category: 'Technology', cover_url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400' },
-  { id: '4', title: 'Code of Conduct & Ethics', author: 'Legal Team', category: 'Compliance', cover_url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400' },
-  { id: '5', title: 'Q3 Financial Report Guidelines', author: 'Finance Dept', category: 'Finance', cover_url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400' },
-  { id: '6', title: 'Radical Candor', author: 'Kim Scott', category: 'Leadership', cover_url: 'https://images.unsplash.com/photo-1517404215738-15263e9f9178?w=400' },
-  { id: '7', title: 'Remote Work Ergonomics', author: 'Health & Safety', category: 'HR Policies', cover_url: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400' },
-])
+const selectedCategory = ref('')
+const selectedSort = ref('recent')
 
-onMounted(() => {
-  // Simulate network fetch
-  setTimeout(() => {
+// For UI binding
+const filteredBooks = ref<any[]>([])
+
+const fetchBooks = async (isLoadMore = false) => {
+  if (isLoadMore) {
+    loadingMore.value = true
+    page.value++
+  } else {
+    loading.value = true
+    page.value = 0
+    books.value = []
+  }
+
+  const from = page.value * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
+
+  try {
+    let query = supabase.from('books').select('*', { count: 'exact' })
+
+    if (libraryStore.searchQuery) {
+      query = query.or(`title.ilike.%${libraryStore.searchQuery}%,author.ilike.%${libraryStore.searchQuery}%`)
+    }
+    if (selectedCategory.value) {
+      query = query.eq('category', selectedCategory.value)
+    }
+
+    if (selectedSort.value === 'recent') {
+      query = query.order('created_at', { ascending: false })
+    } else if (selectedSort.value === 'popular') {
+      query = query.order('reads_count', { ascending: false })
+    } else if (selectedSort.value === 'alpha') {
+      query = query.order('title', { ascending: true })
+    }
+
+    const { data, count, error } = await query.range(from, to)
+
+    if (error) throw error
+
+    if (data) {
+      books.value = isLoadMore ? [...books.value, ...data] : data
+      filteredBooks.value = books.value
+      hasMore.value = count ? (from + data.length) < count : false
+    }
+  } catch (err: any) {
+    toastStore.error("Failed to load books: " + err.message)
+  } finally {
     loading.value = false
-  }, 800)
+    loadingMore.value = false
+  }
+}
+
+onMounted(() => fetchBooks())
+
+watch([() => libraryStore.searchQuery, selectedCategory, selectedSort], () => {
+  fetchBooks(false)
 })
 
 const openReader = (id: string) => {
