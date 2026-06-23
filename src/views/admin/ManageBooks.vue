@@ -239,11 +239,12 @@ const extractPdfInfo = async (file: File) => {
     const metadata = await pdf.getMetadata()
     let hasTitle = false
     if (metadata?.info) {
-      if (metadata.info.Title) {
-        form.value.title = metadata.info.Title
+      const info = metadata.info as any;
+      if (info.Title) {
+        form.value.title = info.Title
         hasTitle = true
       }
-      if (metadata.info.Author) form.value.author = metadata.info.Author
+      if (info.Author) form.value.author = info.Author
     }
     
     // Fallback to filename if no embedded title
@@ -261,7 +262,7 @@ const extractPdfInfo = async (file: File) => {
     canvas.height = viewport.height
     
     if (ctx) {
-      await page.render({ canvasContext: ctx, viewport }).promise
+      await page.render({ canvasContext: ctx, viewport } as any).promise
       
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8))
       if (blob) {
