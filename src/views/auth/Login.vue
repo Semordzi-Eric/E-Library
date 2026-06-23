@@ -384,9 +384,15 @@ const handleSignUp = async () => {
 
     if (authError) throw authError
 
-    // Show OTP screen
-    showOtpInput.value = true
-    isSignUp.value = false
+    if (authData.session) {
+      // Email confirmation is turned off in Supabase — user is already logged in!
+      await authStore.initializeAuth()
+      router.push('/dashboard')
+    } else {
+      // Email confirmation is turned on — show OTP screen or ask to check email
+      showOtpInput.value = true
+      isSignUp.value = false
+    }
 
   } catch (error: any) {
     if (error.message?.includes('already registered')) {
