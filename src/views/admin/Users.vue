@@ -15,13 +15,14 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Employee</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Role</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Department</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Reading Stats</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Joined</th>
             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-if="profiles.length === 0">
-            <td colspan="5" class="px-6 py-8 text-center text-gray-500">No employees found.</td>
+            <td colspan="6" class="px-6 py-8 text-center text-gray-500">No employees found.</td>
           </tr>
           <tr v-for="profile in profiles" :key="profile.id">
             <td class="px-6 py-4 whitespace-nowrap">
@@ -43,6 +44,13 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
               {{ profile.department || 'N/A' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
+              <div v-if="profile.booksStarted !== undefined">
+                <div class="font-medium text-gray-900">{{ formatTime(profile.totalReadingTime || 0) }} read</div>
+                <div class="text-xs">{{ profile.booksStarted }} books started</div>
+              </div>
+              <span v-else class="text-gray-400">Loading...</span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
               {{ new Date(profile.created_at).toLocaleDateString() }}
@@ -81,6 +89,14 @@ const page = ref(0)
 const PAGE_SIZE = 50
 const hasMore = ref(true)
 
+const formatTime = (seconds: number) => {
+  if (!seconds) return '0h 0m'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
+}
+
 const fetchProfiles = async (isLoadMore = false) => {
   if (isLoadMore) {
     loadingMore.value = true
@@ -101,7 +117,23 @@ const fetchProfiles = async (isLoadMore = false) => {
     .range(from, to)
 
   if (data) {
-    profiles.value = isLoadMore ? [...profiles.value, ...data] : data
+    const profileIds = data.map(p => p.id)
+    const { data: sessions } = await supabase
+      .from('reading_sessions')
+      .select('user_id, time_spent_seconds')
+      .in('user_id', profileIds)
+
+    const profilesWithStats = data.map(p => {
+      const userSessions = sessions?.filter(s => s.user_id === p.id) || []
+      const totalTime = userSessions.reduce((acc, curr) => acc + (curr.time_spent_seconds || 0), 0)
+      return {
+        ...p,
+        booksStarted: userSessions.length,
+        totalReadingTime: totalTime
+      }
+    })
+
+    profiles.value = isLoadMore ? [...profiles.value, ...profilesWithStats] : profilesWithStats
     hasMore.value = count ? (from + data.length) < count : false
   }
   if (error) {
