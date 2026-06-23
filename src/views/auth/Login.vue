@@ -383,21 +383,6 @@ const handleSignUp = async () => {
 
     if (authError) throw authError
 
-    // Insert profile immediately (before OTP verification, will be confirmed after)
-    if (authData.user) {
-      const { error: profileError } = await supabase.from('profiles').insert([{
-        id: authData.user.id,
-        name: signupName.value.trim(),
-        department: signupDepartment.value,
-        title: 'Employee',
-        role: 'employee'
-      }])
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError)
-      }
-    }
-
     // Show OTP screen
     showOtpInput.value = true
     isSignUp.value = false
@@ -419,13 +404,28 @@ const handleVerifyOtp = async () => {
     loading.value = true
     errorMessage.value = ''
 
-    const { error } = await supabase.auth.verifyOtp({
+    const { data: verifyData, error } = await supabase.auth.verifyOtp({
       email: signupEmail.value,
       token: otpCode.value,
       type: 'signup'
     })
 
     if (error) throw error
+
+    // Insert profile now that the user is fully authenticated
+    if (verifyData?.user) {
+      const { error: profileError } = await supabase.from('profiles').insert([{
+        id: verifyData.user.id,
+        name: signupName.value.trim(),
+        department: signupDepartment.value,
+        title: 'Staff',
+        role: 'employee'
+      }])
+      
+      if (profileError) {
+        console.error('Profile creation error during OTP verification:', profileError)
+      }
+    }
 
     // OTP verified — sign them in automatically
     await authStore.initializeAuth()
