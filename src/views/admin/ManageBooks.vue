@@ -200,7 +200,29 @@ const fetchBooks = async (isLoadMore = false) => {
     .range(from, to)
     
   if (data) {
-    books.value = isLoadMore ? [...books.value, ...data] : data
+    const bookIds = data.map(b => b.id)
+    
+    // Fetch stats
+    const { data: sessions } = await supabase.from('reading_sessions').select('book_id').in('book_id', bookIds)
+    const { data: downloads } = await supabase.from('downloads').select('book_id').in('book_id', bookIds)
+
+    const sessionCounts = (sessions || []).reduce((acc, curr) => {
+      acc[curr.book_id] = (acc[curr.book_id] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const downloadCounts = (downloads || []).reduce((acc, curr) => {
+      acc[curr.book_id] = (acc[curr.book_id] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const enrichedBooks = data.map(b => ({
+      ...b,
+      reads_count: sessionCounts[b.id] || 0,
+      downloads_count: downloadCounts[b.id] || 0
+    }))
+
+    books.value = isLoadMore ? [...books.value, ...enrichedBooks] : enrichedBooks
     hasMore.value = count ? (from + data.length) < count : false
   }
   if (error) toastStore.error(error.message)
@@ -327,11 +349,11 @@ const uploadBook = async () => {
     if (coverFile.value) {
       const coverPath = `covers/${timeId}_${coverFile.value.name}`
       const { error: coverError } = await supabase.storage
-        .from('documents')
+        .from('covers')
         .upload(coverPath, coverFile.value)
         
       if (coverError) throw coverError
-      const { data: coverUrlData } = supabase.storage.from('documents').getPublicUrl(coverPath)
+      const { data: coverUrlData } = supabase.storage.from('covers').getPublicUrl(coverPath)
       coverUrl = coverUrlData.publicUrl
     }
     
@@ -341,7 +363,7 @@ const uploadBook = async () => {
       author: form.value.author,
       category: form.value.category,
       description: form.value.description,
-      allow_download: form.value.allowDownload,
+      download_allowed: form.value.allowDownload,
       file_url: pdfUrlData.publicUrl,
       cover_url: coverUrl || null
     })

@@ -83,26 +83,38 @@ onMounted(async () => {
   totalSessions.value = sCount || 0
   
   // Fetch book metrics for charts
-  const { data: books } = await supabase.from('books').select('title, reads_count, category').order('reads_count', { ascending: false })
+  const { data: books } = await supabase.from('books').select('id, title, category')
   
   if (books) {
-    totalReads.value = books.reduce((acc, curr) => acc + (curr.reads_count || 0), 0)
+    const { data: sessions } = await supabase.from('reading_sessions').select('book_id')
+    
+    const sessionCounts = (sessions || []).reduce((acc, curr) => {
+      acc[curr.book_id] = (acc[curr.book_id] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const enrichedBooks = books.map(b => ({
+      ...b,
+      reads_count: sessionCounts[b.id] || 0
+    })).sort((a, b) => b.reads_count - a.reads_count)
+
+    totalReads.value = enrichedBooks.reduce((acc, curr) => acc + curr.reads_count, 0)
     
     // Bar Chart Data (Top 5)
-    const topBooks = books.slice(0, 5)
+    const topBooks = enrichedBooks.slice(0, 5)
     barChartData.value = {
       labels: topBooks.map(b => b.title.length > 20 ? b.title.substring(0,20)+'...' : b.title),
       datasets: [
         {
           label: 'Reads',
           backgroundColor: '#3b82f6', // primary
-          data: topBooks.map(b => b.reads_count || 0)
+          data: topBooks.map(b => b.reads_count)
         }
       ]
     }
     
     // Pie Chart Data (Category breakdown)
-    const catMap = books.reduce((acc, curr) => {
+    const catMap = enrichedBooks.reduce((acc, curr) => {
       acc[curr.category] = (acc[curr.category] || 0) + 1
       return acc
     }, {} as Record<string, number>)
