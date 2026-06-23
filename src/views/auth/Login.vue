@@ -323,8 +323,8 @@ const handleLogin = async () => {
     })
 
     if (error) {
-      if (error.message.toLowerCase().includes('invalid')) {
-        throw new Error('Incorrect password. Please try again.')
+      if (error.message.toLowerCase().includes('invalid login credentials')) {
+        throw new Error('Incorrect password or email. Please try again.')
       }
       throw error
     }
