@@ -65,15 +65,32 @@ export const useAuthStore = defineStore('auth', () => {
     if (data && !error) {
       profile.value = data as UserProfile
     } else {
-      // Fallback profile with default employee role
-      profile.value = {
+      // Profile missing (likely verified via email link). Auto-create using metadata.
+      const meta = user.value?.user_metadata || {}
+      
+      const newProfile = {
         id: userId,
-        name: user.value?.user_metadata?.name || null,
-        employee_id: null,
-        department: null,
-        title: null,
-        role: 'employee',
-        created_at: new Date().toISOString()
+        name: meta.name || null,
+        department: meta.department || null,
+        title: 'Staff',
+        role: 'employee'
+      }
+      
+      const { data: inserted, error: insertError } = await supabase
+        .from('profiles')
+        .insert([newProfile])
+        .select()
+        .single()
+        
+      if (inserted && !insertError) {
+        profile.value = inserted as UserProfile
+      } else {
+        // Fallback if insert fails
+        profile.value = {
+          ...newProfile,
+          employee_id: null,
+          created_at: new Date().toISOString()
+        } as UserProfile
       }
     }
   }

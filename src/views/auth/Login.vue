@@ -376,7 +376,8 @@ const handleSignUp = async () => {
       password: signupPassword.value,
       options: {
         data: {
-          name: signupName.value.trim()
+          name: signupName.value.trim(),
+          department: signupDepartment.value
         }
       }
     })
