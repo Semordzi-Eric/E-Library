@@ -70,6 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       const newProfile = {
         id: userId,
+        employee_id: `EMP-${userId.substring(0, 8).toUpperCase()}`,
         name: meta.name || null,
         department: meta.department || null,
         title: 'Staff',

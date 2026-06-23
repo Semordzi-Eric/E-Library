@@ -423,6 +423,7 @@ const handleVerifyOtp = async () => {
     if (verifyData?.user) {
       const { error: profileError } = await supabase.from('profiles').insert([{
         id: verifyData.user.id,
+        employee_id: `EMP-${verifyData.user.id.substring(0, 8).toUpperCase()}`,
         name: signupName.value.trim(),
         department: signupDepartment.value,
         title: 'Staff',
