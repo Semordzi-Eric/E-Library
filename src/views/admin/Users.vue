@@ -1,18 +1,18 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-text-main">Employee Management</h2>
+      <h2 class="text-2xl font-bold text-text-main">Staff Management</h2>
     </div>
 
     <!-- Data Table -->
     <div class="bg-surface border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <div v-if="loading" class="p-8 text-center text-gray-500">
-        Loading employees...
+        Loading staff...
       </div>
       <table v-else class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Employee</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Staff</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Role</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Department</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Reading Stats</th>
@@ -22,7 +22,7 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-if="profiles.length === 0">
-            <td colspan="6" class="px-6 py-8 text-center text-gray-500">No employees found.</td>
+            <td colspan="6" class="px-6 py-8 text-center text-gray-500">No staff found.</td>
           </tr>
           <tr v-for="profile in profiles" :key="profile.id">
             <td class="px-6 py-4 whitespace-nowrap">
@@ -39,7 +39,7 @@
             <td class="px-6 py-4 whitespace-nowrap">
               <select v-model="profile.role" @change="updateRole(profile.id, profile.role)" class="text-sm border-gray-300 rounded-md focus:ring-primary focus:border-primary">
                 <option value="admin">Admin</option>
-                <option value="employee">Employee</option>
+                <option value="employee">Staff</option>
               </select>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
@@ -68,7 +68,7 @@
           :disabled="loadingMore"
           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
         >
-          {{ loadingMore ? 'Loading...' : 'Load More Employees' }}
+          {{ loadingMore ? 'Loading...' : 'Load More Staff' }}
         </button>
       </div>
     </div>
@@ -157,12 +157,12 @@ const updateRole = async (id: string, newRole: string) => {
 }
 
 const deleteProfile = async (id: string) => {
-  if (confirm('Are you sure you want to remove this employee\'s profile access? Note: They will not be able to log in to the app until a new profile is created.')) {
+  if (confirm('Are you sure you want to remove this staff member\'s profile access? Note: They will not be able to log in to the app until a new profile is created.')) {
     const { error } = await supabase.from('profiles').delete().eq('id', id)
     if (error) {
       toastStore.error("Error: " + error.message)
     } else {
-      toastStore.success("Employee access removed")
+      toastStore.success("Staff access removed")
       await fetchProfiles()
     }
   }

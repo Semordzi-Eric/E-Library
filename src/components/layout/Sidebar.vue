@@ -12,7 +12,7 @@
 
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-      <!-- Employee section label -->
+      <!-- Staff section label -->
       <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Menu</p>
 
       <router-link
@@ -47,7 +47,7 @@
           <p class="text-sm font-semibold text-text-main truncate">{{ authStore.displayName }}</p>
           <div class="flex items-center gap-1.5 mt-0.5">
             <span class="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" :class="authStore.role === 'admin' ? 'bg-purple-500' : 'bg-green-500'"></span>
-            <p class="text-xs text-text-muted capitalize truncate">{{ authStore.role === 'admin' ? 'Administrator' : 'Employee' }}</p>
+            <p class="text-xs text-text-muted capitalize truncate">{{ authStore.role === 'admin' ? 'Administrator' : 'Staff' }}</p>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ const navItems = computed(() => {
   if (authStore.role === 'admin') {
     items.push(
       { name: 'Manage Books', path: '/admin/books', icon: UploadIcon },
-      { name: 'Employees', path: '/admin/users', icon: UsersIcon },
+      { name: 'Staff', path: '/admin/users', icon: UsersIcon },
       { name: 'Reports', path: '/admin/reports', icon: BarChartIcon },
       { name: 'Activity Logs', path: '/admin/activity', icon: ActivityIcon },
     )

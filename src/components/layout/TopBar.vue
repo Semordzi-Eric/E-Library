@@ -44,7 +44,7 @@
           <div v-if="dropdownOpen" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100">
               <p class="text-sm font-semibold text-gray-900 truncate">{{ authStore.displayName }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ authStore.profile?.department || 'Employee' }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ authStore.profile?.department || 'Staff' }}</p>
               <span class="inline-flex items-center mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium" :class="authStore.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'">
                 {{ roleLabel }}
               </span>
@@ -145,7 +145,7 @@ const dropdownRef = ref<HTMLElement | null>(null)
 const roleLabel = computed(() => {
   const r = authStore.role
   if (r === 'admin') return 'Administrator'
-  return 'Employee'
+  return 'Staff'
 })
 
 // Close dropdown when clicking outside

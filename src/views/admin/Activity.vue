@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-text-main">Employee Activity</h2>
+      <h2 class="text-2xl font-bold text-text-main">Staff Activity</h2>
       <button @click="refreshAll" class="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors">
         <RefreshCwIcon class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
         Refresh
@@ -23,7 +23,7 @@
         <table v-if="!loadingSessions" class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Employee</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Staff</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Book</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Progress</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Time Spent</th>
@@ -96,7 +96,7 @@
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Time</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Employee</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Staff</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Action</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Details</th>
             </tr>

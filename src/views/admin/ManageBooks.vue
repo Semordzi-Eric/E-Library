@@ -122,7 +122,7 @@
               </div>
               <div class="col-span-2 flex items-center mt-2">
                 <input v-model="form.allowDownload" type="checkbox" id="download" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-                <label for="download" class="ml-2 block text-sm text-text-main">Allow employees to download this file</label>
+                <label for="download" class="ml-2 block text-sm text-text-main">Allow staff to download this file</label>
               </div>
             </div>
             

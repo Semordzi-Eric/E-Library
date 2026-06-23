@@ -259,7 +259,7 @@ const errorMessage = ref('')
 const pageSubtitle = computed(() => {
   if (showOtpInput.value) return 'Verify your email address'
   if (showForgotPassword.value || showForgotSuccess.value) return 'Account recovery'
-  return isSignUp.value ? 'Create your employee account' : 'Sign in to access your resources'
+  return isSignUp.value ? 'Create your staff account' : 'Sign in to access your resources'
 })
 
 function switchToLogin() {

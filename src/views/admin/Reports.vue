@@ -11,7 +11,7 @@
         <p class="text-3xl font-bold text-text-main mt-2">{{ totalBooks }}</p>
       </div>
       <div class="bg-surface p-6 rounded-xl border border-gray-200 shadow-sm">
-        <p class="text-sm font-medium text-text-muted">Total Employees</p>
+        <p class="text-sm font-medium text-text-muted">Total Staff</p>
         <p class="text-3xl font-bold text-text-main mt-2">{{ totalUsers }}</p>
       </div>
       <div class="bg-surface p-6 rounded-xl border border-gray-200 shadow-sm">
