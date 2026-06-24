@@ -38,7 +38,6 @@
                   <div class="text-sm text-text-muted mb-1">{{ book.author }}</div>
                   <!-- Mobile only actions -->
                   <div class="flex items-center gap-3 sm:hidden mt-1">
-                    <button @click="editBook(book)" class="text-xs text-primary hover:text-primary-dark font-medium">Edit</button>
                     <button @click="deleteBook(book.id)" class="text-xs text-red-600 hover:text-red-900 font-medium">Delete</button>
                   </div>
                 </div>
@@ -53,7 +52,7 @@
               <div>{{ book.reads_count || 0 }} Reads</div>
               <div>{{ book.downloads_count || 0 }} Downloads</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white z-10 border-l border-gray-50">
               <button @click="deleteBook(book.id)" class="text-red-600 hover:text-red-900">Delete</button>
             </td>
           </tr>
