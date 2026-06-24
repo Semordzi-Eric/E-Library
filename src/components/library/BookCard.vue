@@ -1,15 +1,15 @@
 <template>
-  <div class="bg-surface border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow group flex flex-col cursor-pointer h-full">
+  <div class="bg-surface border border-gray-200 rounded-xl overflow-hidden hover:shadow-md active:scale-[0.97] active:shadow-sm active:bg-gray-50 transition-all duration-200 group flex flex-col cursor-pointer h-full">
     <div class="aspect-[2/3] w-full bg-gray-100 relative overflow-hidden">
       <img v-if="book.cover_url" :src="book.cover_url" :alt="book.title" class="w-full h-full object-cover" />
       <div v-else class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
         <BookIcon class="w-12 h-12" />
       </div>
-      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-        <button class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-full font-medium transition-transform transform scale-95 group-hover:scale-100 flex items-center gap-2">
+      <div class="absolute inset-0 bg-black/40 opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+        <div class="bg-primary text-white px-6 py-2 rounded-full font-medium transition-transform transform scale-95 lg:group-hover:scale-100 flex items-center gap-2 shadow-lg">
           <BookOpenIcon class="w-4 h-4" />
           Read Now
-        </button>
+        </div>
       </div>
     </div>
     <div class="p-4 flex flex-col flex-1">

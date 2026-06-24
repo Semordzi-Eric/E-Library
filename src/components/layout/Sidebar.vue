@@ -27,7 +27,7 @@
         v-for="item in navItems"
         :key="item.name"
         :to="item.path"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group active:scale-[0.98] active:bg-gray-100"
         :class="[
           $route.path.startsWith(item.path) || $route.path === item.path
             ? 'bg-blue-50 text-primary shadow-sm'

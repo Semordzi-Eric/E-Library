@@ -2,7 +2,7 @@
   <header class="h-16 bg-surface border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 relative z-40">
     <!-- Left side: Menu toggle + Search -->
     <div class="flex items-center flex-1 max-w-xl gap-2 sm:gap-4">
-      <button @click="$emit('toggle-sidebar')" class="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+      <button @click="$emit('toggle-sidebar')" class="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all">
         <MenuIcon class="w-6 h-6" />
       </button>
       
@@ -22,7 +22,7 @@
     <!-- Right side -->
     <div class="flex items-center gap-3 ml-6">
       <!-- Notification bell -->
-      <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative">
+      <button class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all relative">
         <BellIcon class="h-5 w-5" />
         <span class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
       </button>

@@ -12,7 +12,7 @@
     <!-- Reader Top Bar -->
     <header class="h-14 border-b border-gray-700/60 px-6 flex items-center justify-between shrink-0 bg-gray-900/95 backdrop-blur-sm z-10">
       <div class="flex items-center gap-4">
-        <button @click="router.back()" class="p-2 hover:bg-gray-800 rounded-lg transition-colors text-gray-400 hover:text-white">
+        <button @click="router.back()" class="p-2 hover:bg-gray-800 active:scale-90 active:bg-gray-700 rounded-lg transition-all text-gray-400 hover:text-white">
           <ArrowLeftIcon class="w-5 h-5" />
         </button>
         <div>
@@ -32,13 +32,13 @@
 
         <!-- Zoom controls -->
         <div class="flex items-center bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-          <button @click="zoomOut" class="p-2 hover:bg-gray-700 text-gray-300 transition-colors" title="Zoom Out">
+          <button @click="zoomOut" class="p-2 hover:bg-gray-700 active:scale-90 active:bg-gray-600 text-gray-300 transition-all" title="Zoom Out">
             <ZoomOutIcon class="w-4 h-4" />
           </button>
           <div class="px-3 text-xs font-medium text-gray-300 border-x border-gray-700 min-w-[48px] text-center">
             {{ Math.round(scale * 100) }}%
           </div>
-          <button @click="zoomIn" class="p-2 hover:bg-gray-700 text-gray-300 transition-colors" title="Zoom In">
+          <button @click="zoomIn" class="p-2 hover:bg-gray-700 active:scale-90 active:bg-gray-600 text-gray-300 transition-all" title="Zoom In">
             <ZoomInIcon class="w-4 h-4" />
           </button>
         </div>
@@ -108,7 +108,7 @@
         <button
           @click="prevPage"
           :disabled="currentPage <= 1"
-          class="p-2 hover:bg-gray-800 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          class="p-2 hover:bg-gray-800 active:scale-90 active:bg-gray-700 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronLeftIcon class="w-6 h-6" />
         </button>
@@ -120,7 +120,7 @@
         <button
           @click="nextPage"
           :disabled="currentPage >= pageCount"
-          class="p-2 hover:bg-gray-800 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          class="p-2 hover:bg-gray-800 active:scale-90 active:bg-gray-700 rounded-full transition-all disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronRightIcon class="w-6 h-6" />
         </button>
