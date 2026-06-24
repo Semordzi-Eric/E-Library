@@ -1,8 +1,12 @@
 <template>
-  <header class="h-16 bg-surface border-b border-gray-200 flex items-center justify-between px-6 relative z-50">
-    <!-- Search -->
-    <div class="flex-1 max-w-xl">
-      <div class="relative">
+  <header class="h-16 bg-surface border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 relative z-40">
+    <!-- Left side: Menu toggle + Search -->
+    <div class="flex items-center flex-1 max-w-xl gap-2 sm:gap-4">
+      <button @click="$emit('toggle-sidebar')" class="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+        <MenuIcon class="w-6 h-6" />
+      </button>
+      
+      <div class="flex-1 relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <SearchIcon class="h-4 w-4 text-gray-400" />
         </div>
@@ -130,10 +134,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { SearchIcon, BellIcon, ChevronDownIcon, LogOutIcon, KeyIcon, XIcon, EyeIcon, EyeOffIcon } from '@lucide/vue'
+import { SearchIcon, BellIcon, ChevronDownIcon, LogOutIcon, KeyIcon, XIcon, EyeIcon, EyeOffIcon, MenuIcon } from '@lucide/vue'
 import { useAuthStore } from '../../stores/auth'
 import { useLibraryStore } from '../../stores/library'
 import { useRouter } from 'vue-router'
+
+defineEmits(['toggle-sidebar'])
 
 const authStore = useAuthStore()
 const libraryStore = useLibraryStore()

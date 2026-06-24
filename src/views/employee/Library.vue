@@ -20,7 +20,7 @@
     </div>
 
     <!-- Book Grid -->
-    <div v-if="loading" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
       <div v-for="n in 10" :key="n" class="animate-pulse flex flex-col bg-surface border border-gray-100 rounded-xl overflow-hidden">
         <div class="aspect-[2/3] bg-gray-200"></div>
         <div class="p-4 space-y-3">
@@ -36,7 +36,7 @@
     </div>
 
     <div v-else class="space-y-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
         <BookCard 
           v-for="book in filteredBooks" 
           :key="book.id" 

@@ -19,7 +19,8 @@
       <div v-if="loading" class="p-8 text-center text-gray-500">
         Loading staff...
       </div>
-      <table v-else class="min-w-full divide-y divide-gray-200">
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Staff</th>
@@ -73,7 +74,8 @@
             </td>
           </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
       
       <div v-if="hasMore && !loading" class="p-4 flex justify-center border-t border-gray-200">
         <button 
@@ -119,7 +121,7 @@
               Loading data...
             </div>
             
-            <div v-else-if="activeTab === 'sessions'" class="max-h-[60vh] overflow-y-auto">
+            <div v-else-if="activeTab === 'sessions'" class="max-h-[60vh] overflow-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0">
                   <tr>
@@ -148,7 +150,7 @@
               </table>
             </div>
 
-            <div v-else-if="activeTab === 'logs'" class="max-h-[60vh] overflow-y-auto">
+            <div v-else-if="activeTab === 'logs'" class="max-h-[60vh] overflow-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50 sticky top-0">
                   <tr>

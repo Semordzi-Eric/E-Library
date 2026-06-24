@@ -13,7 +13,8 @@
       <div v-if="loadingBooks" class="p-8 text-center text-gray-500">
         Loading books...
       </div>
-      <table v-else class="min-w-full divide-y divide-gray-200">
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Book Details</th>
@@ -52,7 +53,8 @@
             </td>
           </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
       
       <div v-if="hasMore && !loadingBooks" class="p-4 flex justify-center border-t border-gray-200">
         <button 
@@ -77,8 +79,8 @@
           </div>
           
           <form @submit.prevent="uploadBook" class="p-6 space-y-6">
-            <div class="grid grid-cols-2 gap-6">
-              <div class="col-span-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Title</label>
                 <input v-model="form.title" type="text" required class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary">
               </div>
@@ -96,11 +98,11 @@
                   <option value="Finance">Finance</option>
                 </select>
               </div>
-              <div class="col-span-2">
+              <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Description</label>
                 <textarea v-model="form.description" rows="3" class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary"></textarea>
               </div>
-              <div class="col-span-2">
+              <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">PDF File</label>
                 <div class="relative">
                   <input @change="handlePdfChange" required type="file" accept="application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
@@ -110,7 +112,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-span-2">
+              <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Cover Image (Optional)</label>
                 <div class="flex items-center gap-4">
                   <input @change="handleCoverChange" type="file" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
@@ -120,7 +122,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-span-2 flex items-center mt-2">
+              <div class="col-span-1 sm:col-span-2 flex items-center mt-2">
                 <input v-model="form.allowDownload" type="checkbox" id="download" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
                 <label for="download" class="ml-2 block text-sm text-text-main">Allow staff to download this file</label>
               </div>

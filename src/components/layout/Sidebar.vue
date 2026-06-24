@@ -1,13 +1,21 @@
 <template>
-  <aside class="w-64 bg-surface border-r border-gray-200 flex flex-col h-full">
+  <aside 
+    :class="[
+      'fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 md:relative md:translate-x-0 w-64 bg-surface border-r border-gray-200 flex flex-col h-full',
+      isOpen ? 'translate-x-0' : '-translate-x-full'
+    ]"
+  >
     <!-- Logo -->
-    <div class="h-16 flex items-center px-6 border-b border-gray-200">
+    <div class="h-16 flex items-center justify-between px-6 border-b border-gray-200">
       <h1 class="text-xl font-bold text-text-main flex items-center gap-2">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
           <BookOpenIcon class="w-4 h-4 text-white" />
         </div>
         Korba E-Library
       </h1>
+      <button @click="$emit('close')" class="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+        <XIcon class="w-5 h-5" />
+      </button>
     </div>
 
     <!-- Navigation -->
@@ -62,9 +70,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { BookOpenIcon, LayoutDashboardIcon, LibraryIcon, LogOutIcon, UploadIcon, UsersIcon, BarChartIcon, ActivityIcon } from '@lucide/vue'
+import { BookOpenIcon, LayoutDashboardIcon, LibraryIcon, LogOutIcon, UploadIcon, UsersIcon, BarChartIcon, ActivityIcon, XIcon } from '@lucide/vue'
 import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
+
+defineProps<{ isOpen: boolean }>()
+defineEmits(['close'])
 
 const authStore = useAuthStore()
 const router = useRouter()
