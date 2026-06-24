@@ -1,7 +1,7 @@
 <template>
   <div class="bg-surface border border-gray-200 rounded-xl overflow-hidden hover:shadow-md active:scale-[0.97] active:shadow-sm active:bg-gray-50 transition-all duration-200 group flex flex-col cursor-pointer h-full">
     <div class="aspect-[2/3] w-full bg-gray-100 relative overflow-hidden">
-      <img v-if="book.cover_url" :src="book.cover_url" :alt="book.title" class="w-full h-full object-cover" />
+      <img v-if="book.cover_url" :src="book.cover_url" :alt="book.title" loading="lazy" class="w-full h-full object-cover" />
       <div v-else class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
         <BookIcon class="w-12 h-12" />
       </div>

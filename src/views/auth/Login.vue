@@ -478,13 +478,13 @@ const handleForgotPassword = async () => {
 
 /* Input */
 .auth-input {
-  @apply w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm placeholder-gray-400
+  @apply w-full px-3 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm placeholder-gray-400
          focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200;
 }
 
 /* Button */
 .auth-btn {
-  @apply w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-semibold
+  @apply w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-semibold
          rounded-xl text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm;
 }
 

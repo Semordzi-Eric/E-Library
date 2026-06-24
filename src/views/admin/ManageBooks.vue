@@ -31,7 +31,7 @@
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-12 w-8 bg-gray-200 rounded overflow-hidden">
-                  <img v-if="book.cover_url" :src="book.cover_url" class="h-full w-full object-cover" />
+                  <img v-if="book.cover_url" :src="book.cover_url" loading="lazy" class="h-full w-full object-cover" />
                 </div>
                 <div class="ml-4">
                   <div class="text-sm font-bold text-text-main">{{ book.title }}</div>
@@ -82,15 +82,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Title</label>
-                <input v-model="form.title" type="text" required class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary">
+                <input v-model="form.title" type="text" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
               </div>
               <div>
                 <label class="block text-sm font-medium text-text-main mb-1">Author</label>
-                <input v-model="form.author" type="text" required class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary">
+                <input v-model="form.author" type="text" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
               </div>
               <div>
                 <label class="block text-sm font-medium text-text-main mb-1">Category</label>
-                <select v-model="form.category" required class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary">
+                <select v-model="form.category" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
                   <option value="Leadership">Leadership</option>
                   <option value="HR Policies">HR Policies</option>
                   <option value="Compliance">Compliance</option>
@@ -105,7 +105,7 @@
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">PDF File</label>
                 <div class="relative">
-                  <input @change="handlePdfChange" required type="file" accept="application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
+                  <input @change="handlePdfChange" required type="file" accept="application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
                   <div v-if="isExtracting" class="absolute right-2 top-2 text-sm text-blue-600 flex items-center bg-white px-2 py-1 rounded shadow-sm border border-blue-100">
                     <svg class="animate-spin w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                     Extracting book info...
@@ -115,9 +115,9 @@
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Cover Image (Optional)</label>
                 <div class="flex items-center gap-4">
-                  <input @change="handleCoverChange" type="file" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
+                  <input @change="handleCoverChange" type="file" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
                   <div v-if="coverPreviewUrl" class="flex items-center gap-2 flex-shrink-0">
-                    <img :src="coverPreviewUrl" class="h-16 w-12 object-cover rounded shadow border border-gray-200" alt="Cover preview" />
+                    <img :src="coverPreviewUrl" loading="lazy" class="h-16 w-12 object-cover rounded shadow border border-gray-200" alt="Cover preview" />
                     <span class="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-md">Cover ready</span>
                   </div>
                 </div>

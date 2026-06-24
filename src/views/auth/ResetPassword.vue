@@ -172,7 +172,7 @@ const handleReset = async () => {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .auth-input {
-  @apply w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all duration-200;
+  @apply w-full px-3 py-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all duration-200;
 }
 .auth-btn {
   @apply w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold rounded-xl text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-900/30;
