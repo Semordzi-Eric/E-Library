@@ -28,7 +28,7 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Department</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Reading Stats</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Joined</th>
-            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider sticky right-0 bg-gray-50 z-10">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -43,7 +43,11 @@
                 </div>
                 <div class="ml-4">
                   <div class="text-sm font-bold text-text-main">{{ profile.name || 'Unknown' }}</div>
-                  <div class="text-sm text-text-muted">{{ profile.employee_id || 'No ID' }}</div>
+                  <div class="text-sm text-text-muted mb-1">{{ profile.employee_id || 'No ID' }}</div>
+                  <!-- Mobile only action -->
+                  <button @click="openActivityModal(profile)" class="text-xs text-primary hover:text-primary-dark transition-colors font-semibold sm:hidden inline-flex items-center gap-1">
+                    <ActivityIcon class="w-3 h-3" /> View Activity
+                  </button>
                 </div>
               </div>
             </td>
@@ -66,10 +70,10 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
               {{ new Date(profile.created_at).toLocaleDateString() }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white z-10 border-l border-gray-50">
               <div class="flex items-center justify-end gap-3">
                 <button @click="openActivityModal(profile)" class="text-primary hover:text-primary-dark transition-colors font-semibold">View Activity</button>
-                <button @click="deleteProfile(profile.id)" class="text-red-600 hover:text-red-900 transition-colors">Remove Access</button>
+                <button @click="deleteProfile(profile.id)" class="text-red-600 hover:text-red-900 transition-colors">Remove</button>
               </div>
             </td>
           </tr>

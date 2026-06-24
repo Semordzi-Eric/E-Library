@@ -20,7 +20,7 @@
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Book Details</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Stats</th>
-            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider sticky right-0 bg-gray-50 z-10">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -35,7 +35,12 @@
                 </div>
                 <div class="ml-4">
                   <div class="text-sm font-bold text-text-main">{{ book.title }}</div>
-                  <div class="text-sm text-text-muted">{{ book.author }}</div>
+                  <div class="text-sm text-text-muted mb-1">{{ book.author }}</div>
+                  <!-- Mobile only actions -->
+                  <div class="flex items-center gap-3 sm:hidden mt-1">
+                    <button @click="editBook(book)" class="text-xs text-primary hover:text-primary-dark font-medium">Edit</button>
+                    <button @click="deleteBook(book.id)" class="text-xs text-red-600 hover:text-red-900 font-medium">Delete</button>
+                  </div>
                 </div>
               </div>
             </td>
