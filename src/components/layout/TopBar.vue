@@ -2,7 +2,7 @@
   <header class="h-16 bg-surface border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 relative z-40">
     <!-- Left side: Menu toggle + Search -->
     <div class="flex items-center flex-1 max-w-xl gap-2 sm:gap-4">
-      <button @click="$emit('toggle-sidebar')" class="md:hidden p-2.5 -ml-2 text-gray-500 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all">
+      <button @click="$emit('toggle-sidebar')" aria-label="Open Sidebar" class="md:hidden p-3 -ml-2 text-gray-500 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all touch-manipulation">
         <MenuIcon class="w-6 h-6" />
       </button>
       
@@ -23,9 +23,9 @@
     <div class="flex items-center gap-3 ml-6">
       <!-- Notification bell -->
       <div class="relative" ref="notifDropdownRef">
-        <button @click="notifDropdownOpen = !notifDropdownOpen" class="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all relative">
+        <button @click="notifDropdownOpen = !notifDropdownOpen" aria-label="Notifications" class="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all relative touch-manipulation">
           <BellIcon class="h-5 w-5" />
-          <span v-if="unreadNotifs" class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+          <span v-if="unreadNotifs" class="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
         </button>
 
         <Transition name="dropdown">
@@ -52,7 +52,8 @@
       <div class="relative" ref="dropdownRef">
         <button
           @click="dropdownOpen = !dropdownOpen"
-          class="flex items-center gap-3 pl-3 border-l border-gray-200 hover:opacity-80 transition-opacity"
+          aria-label="User Menu"
+          class="flex items-center gap-3 pl-3 pr-1 py-1 border-l border-gray-200 hover:opacity-80 transition-opacity rounded-lg active:bg-gray-50 touch-manipulation"
         >
           <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
             {{ authStore.initials }}

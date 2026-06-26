@@ -1,11 +1,22 @@
 <template>
   <aside 
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
     :class="[
       'fixed inset-y-0 left-0 z-50 transform transition-all duration-300 md:relative md:translate-x-0 bg-surface border-r border-gray-200 flex flex-col h-full',
-      isOpen ? 'translate-x-0' : '-translate-x-full',
+      isOpen ? 'translate-x-0 shadow-2xl md:shadow-none' : '-translate-x-full',
       isCollapsed ? 'w-20' : 'w-64'
     ]"
   >
+    <!-- Outer edge toggle button (Desktop only) -->
+    <button 
+      @click="toggleCollapse"
+      class="hidden md:flex absolute -right-3 top-8 w-6 h-6 bg-white border border-gray-200 rounded-full shadow-sm items-center justify-center text-gray-500 hover:text-primary hover:border-primary transition-colors z-10"
+      :aria-label="isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'"
+    >
+      <ChevronLeftIcon v-if="!isCollapsed" class="w-3.5 h-3.5" />
+      <ChevronRightIcon v-else class="w-3.5 h-3.5" />
+    </button>
     <!-- Logo -->
     <div class="h-16 flex items-center justify-between px-6 border-b border-gray-200 transition-all duration-300" :class="{ 'px-0 justify-center flex-col gap-1 py-2 h-auto min-h-[64px]': isCollapsed }">
       <h1 v-if="!isCollapsed" class="text-xl font-bold text-text-main flex items-center gap-2">
@@ -18,12 +29,7 @@
         <BookOpenIcon class="w-4 h-4 text-white" />
       </div>
 
-      <button @click="isCollapsed = !isCollapsed" class="hidden md:flex p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" :class="{ 'mt-1': isCollapsed }">
-        <ChevronLeftIcon v-if="!isCollapsed" class="w-5 h-5" />
-        <ChevronRightIcon v-else class="w-5 h-5" />
-      </button>
-
-      <button @click="$emit('close')" class="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+      <button @click="$emit('close')" aria-label="Close Sidebar" class="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg active:bg-gray-200 transition-colors">
         <XIcon class="w-5 h-5" />
       </button>
     </div>
@@ -39,6 +45,8 @@
         :key="item.name"
         :to="item.path"
         :title="isCollapsed ? item.name : ''"
+        :aria-label="item.name"
+        @click="$emit('close')"
         class="flex items-center gap-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group active:scale-[0.98] active:bg-gray-100"
         :class="[
           $route.path.startsWith(item.path) || $route.path === item.path
@@ -74,7 +82,7 @@
         </div>
       </div>
 
-      <button @click="handleLogout" :title="isCollapsed ? 'Sign Out' : ''" class="flex items-center gap-3 py-2 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors" :class="{ 'justify-center px-0': isCollapsed, 'px-3': !isCollapsed }">
+      <button @click="handleLogout" :title="isCollapsed ? 'Sign Out' : ''" aria-label="Sign Out" class="flex items-center gap-3 py-2 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors active:bg-red-100" :class="{ 'justify-center px-0': isCollapsed, 'px-3': !isCollapsed }">
         <LogOutIcon class="w-4 h-4" />
         <span v-if="!isCollapsed">Sign Out</span>
       </button>
@@ -89,11 +97,30 @@ import { useAuthStore } from '../../stores/auth'
 import { useRouter } from 'vue-router'
 
 defineProps<{ isOpen: boolean }>()
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
 const authStore = useAuthStore()
 const router = useRouter()
-const isCollapsed = ref(false)
+
+// State persistence
+const isCollapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
+
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+  localStorage.setItem('sidebar_collapsed', isCollapsed.value.toString())
+}
+
+// Swipe gestures
+const touchStartX = ref(0)
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.changedTouches[0].screenX
+}
+const handleTouchEnd = (e: TouchEvent) => {
+  const touchEndX = e.changedTouches[0].screenX
+  if (touchStartX.value - touchEndX > 50) {
+    emit('close')
+  }
+}
 
 const navItems = computed(() => {
   const items: { name: string; path: string; icon: any }[] = [

@@ -28,11 +28,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import Sidebar from './Sidebar.vue'
 import TopBar from './TopBar.vue'
 
 const sidebarOpen = ref(false)
+const route = useRoute()
+
+// Auto-close on route change
+watch(() => route.path, () => {
+  if (sidebarOpen.value) {
+    sidebarOpen.value = false
+  }
+})
+
+// Body scroll lock on mobile
+watch(sidebarOpen, (isOpen) => {
+  if (isOpen) {
+    document.body.classList.add('overflow-hidden')
+  } else {
+    document.body.classList.remove('overflow-hidden')
+  }
+})
+
+// Handle resize & escape key
+const handleResize = () => {
+  if (window.innerWidth >= 768 && sidebarOpen.value) {
+    sidebarOpen.value = false
+  }
+}
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && sidebarOpen.value) {
+    sidebarOpen.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  document.removeEventListener('keydown', handleKeydown)
+  document.body.classList.remove('overflow-hidden')
+})
 </script>
 
 <style scoped>
