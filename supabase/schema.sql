@@ -43,7 +43,7 @@ create policy "Admins can delete books." on books for delete using (
 create table public.reading_sessions (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
-  book_id uuid references public.books(id) not null,
+  book_id uuid references public.books(id) on delete cascade not null,
   start_time timestamp with time zone default timezone('utc'::text, now()) not null,
   end_time timestamp with time zone,
   duration integer default 0,
@@ -62,7 +62,7 @@ create policy "Users can update own sessions." on reading_sessions for update us
 create table public.downloads (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
-  book_id uuid references public.books(id) not null,
+  book_id uuid references public.books(id) on delete cascade not null,
   timestamp timestamp with time zone default timezone('utc'::text, now()) not null,
   ip_address text,
   device text
@@ -78,7 +78,7 @@ create policy "Users can insert own downloads." on downloads for insert with che
 create table public.bookmarks (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
-  book_id uuid references public.books(id) not null,
+  book_id uuid references public.books(id) on delete cascade not null,
   page_number integer not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique (user_id, book_id)
@@ -90,7 +90,7 @@ create policy "Users manage own bookmarks." on bookmarks for all using (auth.uid
 create table public.assignments (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) not null,
-  book_id uuid references public.books(id) not null,
+  book_id uuid references public.books(id) on delete cascade not null,
   assigned_date timestamp with time zone default timezone('utc'::text, now()) not null,
   completed boolean default false,
   completion_percentage numeric default 0
