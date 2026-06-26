@@ -17,7 +17,7 @@ const isModernBrowser = () => {
   try {
     // PDF.js v4+ relies heavily on modern features like Promise.withResolvers and private fields.
     // Checking for Promise.withResolvers is a good proxy for Safari 17.4+ / modern browsers.
-    return typeof Promise.withResolvers !== 'undefined'
+    return typeof (Promise as any).withResolvers !== 'undefined'
   } catch (e) {
     return false
   }
