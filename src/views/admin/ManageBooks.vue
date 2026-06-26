@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-text-main">Manage Books</h2>
-      <button @click="showUploadModal = true" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+      <button @click="openUploadModal" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
         <PlusIcon class="w-5 h-5" />
         Upload New Book
       </button>
@@ -42,7 +42,7 @@
                 </div>
                 <p class="text-lg font-medium text-gray-900">No books found</p>
                 <p class="text-sm mt-1 mb-4">You haven't uploaded any books yet.</p>
-                <button @click="showUploadModal = true" class="text-sm text-primary font-semibold hover:underline">Upload your first book</button>
+                <button @click="openUploadModal" class="text-sm text-primary font-semibold hover:underline">Upload your first book</button>
               </div>
             </td>
           </tr>
@@ -57,6 +57,7 @@
                   <div class="text-sm text-text-muted mb-1">{{ book.author }}</div>
                   <!-- Mobile only actions -->
                   <div class="flex items-center gap-3 sm:hidden mt-1">
+                    <button @click="openEditModal(book)" class="text-xs text-primary hover:text-primary-dark font-medium">Edit</button>
                     <button @click="deleteBook(book.id)" class="text-xs text-red-600 hover:text-red-900 font-medium">Delete</button>
                   </div>
                 </div>
@@ -72,7 +73,10 @@
               <div>{{ book.downloads_count || 0 }} Downloads</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white z-10 border-l border-gray-50">
-              <button @click="deleteBook(book.id)" class="text-red-600 hover:text-red-900">Delete</button>
+              <div class="flex items-center justify-end gap-3">
+                <button @click="openEditModal(book)" class="text-primary hover:text-primary-dark font-semibold transition-colors">Edit</button>
+                <button @click="deleteBook(book.id)" class="text-red-600 hover:text-red-900 transition-colors">Delete</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -98,7 +102,7 @@
         
         <div class="inline-block align-bottom bg-surface rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
           <div class="bg-surface px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-bold text-text-main" id="modal-title">Upload New Book</h3>
+            <h3 class="text-lg leading-6 font-bold text-text-main" id="modal-title">{{ isEditing ? 'Edit Book' : 'Upload New Book' }}</h3>
           </div>
           
           <form @submit.prevent="uploadBook" class="p-6 space-y-6">
@@ -127,9 +131,9 @@
                 <textarea v-model.trim="form.description" rows="3" class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary"></textarea>
               </div>
               <div class="col-span-1 sm:col-span-2">
-                <label class="block text-sm font-medium text-text-main mb-1">PDF File</label>
+                <label class="block text-sm font-medium text-text-main mb-1">PDF File <span v-if="isEditing" class="text-gray-400 font-normal">(Leave empty to keep current)</span></label>
                 <div class="relative">
-                  <input @change="handlePdfChange" required type="file" accept="application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
+                  <input @change="handlePdfChange" :required="!isEditing" type="file" accept="application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100">
                   <div v-if="isExtracting" class="absolute right-2 top-2 text-sm text-blue-600 flex items-center bg-white px-2 py-1 rounded shadow-sm border border-blue-100">
                     <svg class="animate-spin w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                     Extracting book info...
@@ -156,7 +160,7 @@
             
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse -mx-6 -mb-6 mt-6 border-t border-gray-200">
               <button type="submit" :disabled="uploading" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-dark focus:outline-none disabled:opacity-50 sm:ml-3 sm:w-auto sm:text-sm">
-                {{ uploading ? 'Uploading...' : 'Upload & Save' }}
+                {{ uploading ? 'Saving...' : (isEditing ? 'Save Changes' : 'Upload & Save') }}
               </button>
               <button @click="closeModal" type="button" :disabled="uploading" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                 Cancel
@@ -205,6 +209,35 @@ const form = ref({
 
 const coverFile = ref<File | null>(null)
 const pdfFile = ref<File | null>(null)
+
+const isEditing = ref(false)
+const editingBookId = ref<string | null>(null)
+
+const openUploadModal = () => {
+  isEditing.value = false
+  editingBookId.value = null
+  form.value = { title: '', author: '', category: 'Personal Development', description: '', allowDownload: false }
+  coverPreviewUrl.value = ''
+  coverFile.value = null
+  pdfFile.value = null
+  showUploadModal.value = true
+}
+
+const openEditModal = (book: any) => {
+  isEditing.value = true
+  editingBookId.value = book.id
+  form.value = { 
+    title: book.title, 
+    author: book.author, 
+    category: book.category || 'Personal Development', 
+    description: book.description || '', 
+    allowDownload: book.download_allowed 
+  }
+  coverPreviewUrl.value = book.cover_url || ''
+  coverFile.value = null
+  pdfFile.value = null
+  showUploadModal.value = true
+}
 
 const fetchBooks = async (isLoadMore = false) => {
   if (isLoadMore) {
@@ -356,13 +389,17 @@ const closeModal = () => {
   form.value = { title: '', author: '', category: 'Personal Development', description: '', allowDownload: false }
   coverFile.value = null
   pdfFile.value = null
+  isEditing.value = false
+  editingBookId.value = null
   isExtracting.value = false
-  if (coverPreviewUrl.value) URL.revokeObjectURL(coverPreviewUrl.value)
+  if (coverPreviewUrl.value && coverPreviewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(coverPreviewUrl.value)
+  }
   coverPreviewUrl.value = ''
 }
 
 const uploadBook = async () => {
-  if (!pdfFile.value) {
+  if (!isEditing.value && !pdfFile.value) {
     uploadError.value = "PDF file is required."
     return
   }
@@ -374,17 +411,21 @@ const uploadBook = async () => {
     const timeId = new Date().getTime()
     
     // Upload PDF
-    const pdfPath = `pdfs/${timeId}_${pdfFile.value.name}`
-    const { error: pdfError } = await supabase.storage
-      .from('documents')
-      .upload(pdfPath, pdfFile.value)
+    let pdfPublicUrl = undefined
+    if (pdfFile.value) {
+      const pdfPath = `pdfs/${timeId}_${pdfFile.value.name}`
+      const { error: pdfError } = await supabase.storage
+        .from('documents')
+        .upload(pdfPath, pdfFile.value)
+        
+      if (pdfError) throw pdfError
       
-    if (pdfError) throw pdfError
-    
-    const { data: pdfUrlData } = supabase.storage.from('documents').getPublicUrl(pdfPath)
+      const { data: pdfUrlData } = supabase.storage.from('documents').getPublicUrl(pdfPath)
+      pdfPublicUrl = pdfUrlData.publicUrl
+    }
     
     // Upload Cover if provided
-    let coverUrl = ''
+    let coverUrl = undefined
     if (coverFile.value) {
       const coverPath = `covers/${timeId}_${coverFile.value.name}`
       const { error: coverError } = await supabase.storage
@@ -396,24 +437,31 @@ const uploadBook = async () => {
       coverUrl = coverUrlData.publicUrl
     }
     
-    // Insert into DB
-    const { error: insertError } = await supabase.from('books').insert({
+    const bookData: any = {
       title: form.value.title,
       author: form.value.author,
       category: form.value.category,
       description: form.value.description,
       download_allowed: form.value.allowDownload,
-      file_url: pdfUrlData.publicUrl,
-      cover_url: coverUrl || null
-    })
+    }
+
+    if (pdfPublicUrl) bookData.file_url = pdfPublicUrl
+    if (coverUrl !== undefined) bookData.cover_url = coverUrl
     
-    if (insertError) throw insertError
+    if (isEditing.value && editingBookId.value) {
+      const { error: updateError } = await supabase.from('books').update(bookData).eq('id', editingBookId.value)
+      if (updateError) throw updateError
+      toastStore.success("Book updated successfully")
+    } else {
+      const { error: insertError } = await supabase.from('books').insert(bookData)
+      if (insertError) throw insertError
+      toastStore.success("Book uploaded successfully")
+    }
     
     await fetchBooks()
-    toastStore.success("Book uploaded successfully")
     closeModal()
   } catch (error: any) {
-    uploadError.value = error.message || 'An error occurred during upload.'
+    uploadError.value = error.message || 'An error occurred during save.'
   } finally {
     uploading.value = false
   }
