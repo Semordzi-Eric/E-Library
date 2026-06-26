@@ -12,7 +12,7 @@ create or replace function public.admin_reset_password(p_user_id uuid, p_new_pas
 returns void
 language plpgsql
 security definer -- Elevates privileges so it can modify auth.users
-set search_path = public
+set search_path = public, extensions
 as $$
 begin
   -- 1. Check if the caller is an admin
