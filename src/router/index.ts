@@ -54,7 +54,7 @@ const router = createRouter({
     {
       path: '/read/:id',
       name: 'read',
-      component: () => import('../views/reader/Read.vue')
+      component: () => import('../views/reader/ReaderWrapper.vue')
     },
     {
       path: '/login',
