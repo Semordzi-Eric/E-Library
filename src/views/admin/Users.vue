@@ -8,16 +8,29 @@
           @input="handleSearch"
           type="text" 
           placeholder="Search by name..." 
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none transition-all"
+          class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none transition-all"
         />
         <SearchIcon class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+        <button v-if="searchQuery" @click="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors" aria-label="Clear Search">
+          <XIcon class="h-4 w-4" />
+        </button>
       </div>
     </div>
 
     <!-- Data Table -->
     <div class="bg-surface border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div v-if="loading" class="p-8 text-center text-gray-500">
-        Loading staff...
+      <div v-if="loading" class="p-6">
+        <div class="space-y-4">
+          <div v-for="n in 5" :key="n" class="animate-pulse flex items-center gap-4">
+            <div class="h-10 w-10 bg-gray-200 rounded-full"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/6"></div>
+            </div>
+            <div class="h-4 bg-gray-200 rounded w-24"></div>
+            <div class="h-4 bg-gray-200 rounded w-24"></div>
+          </div>
+        </div>
       </div>
       <div v-else class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -33,9 +46,17 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-if="profiles.length === 0">
-            <td colspan="6" class="px-6 py-8 text-center text-gray-500">No staff found.</td>
+            <td colspan="6" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center justify-center text-gray-500">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                  <SearchIcon class="w-6 h-6 text-gray-400" />
+                </div>
+                <p class="text-lg font-medium text-gray-900">No staff found</p>
+                <p class="text-sm mt-1">We couldn't find anyone matching your search.</p>
+              </div>
+            </td>
           </tr>
-          <tr v-for="profile in profiles" :key="profile.id">
+          <tr v-for="profile in profiles" :key="profile.id" class="hover:bg-gray-50 transition-colors group">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
@@ -228,7 +249,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { SearchIcon, ActivityIcon, XIcon, DownloadIcon } from '@lucide/vue'
 import { supabase } from '../../services/supabase'
 import { useToastStore } from '../../stores/toast'
@@ -263,6 +284,11 @@ const handleSearch = () => {
   searchTimeout = setTimeout(() => {
     fetchProfiles()
   }, 300)
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  handleSearch()
 }
 
 const formatTime = (seconds: number) => {
@@ -326,7 +352,21 @@ const fetchProfiles = async (isLoadMore = false) => {
   loadingMore.value = false
 }
 
-onMounted(() => fetchProfiles())
+onMounted(() => {
+  fetchProfiles()
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    if (showActivityModal.value) closeActivityModal()
+    if (showResetPasswordModal.value) closeResetPasswordModal()
+  }
+}
 
 const updateRole = async (id: string, newRole: string) => {
   const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', id)

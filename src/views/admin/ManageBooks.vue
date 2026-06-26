@@ -10,8 +10,18 @@
 
     <!-- Data Table -->
     <div class="bg-surface border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div v-if="loadingBooks" class="p-8 text-center text-gray-500">
-        Loading books...
+      <div v-if="loadingBooks" class="p-6">
+        <div class="space-y-4">
+          <div v-for="n in 5" :key="n" class="animate-pulse flex items-center gap-4">
+            <div class="h-12 w-8 bg-gray-200 rounded"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/6"></div>
+            </div>
+            <div class="h-6 bg-gray-200 rounded-full w-24"></div>
+            <div class="h-4 bg-gray-200 rounded w-20"></div>
+          </div>
+        </div>
       </div>
       <div v-else class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
@@ -25,9 +35,18 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-if="books.length === 0">
-            <td colspan="4" class="px-6 py-8 text-center text-gray-500">No books found.</td>
+            <td colspan="4" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center justify-center text-gray-500">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                  <PlusIcon class="w-6 h-6 text-gray-400" />
+                </div>
+                <p class="text-lg font-medium text-gray-900">No books found</p>
+                <p class="text-sm mt-1 mb-4">You haven't uploaded any books yet.</p>
+                <button @click="showUploadModal = true" class="text-sm text-primary font-semibold hover:underline">Upload your first book</button>
+              </div>
+            </td>
           </tr>
-          <tr v-for="book in books" :key="book.id">
+          <tr v-for="book in books" :key="book.id" class="hover:bg-gray-50 transition-colors group">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-12 w-8 bg-gray-200 rounded overflow-hidden">
@@ -86,11 +105,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Title</label>
-                <input v-model="form.title" type="text" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
+                <input v-model.trim="form.title" type="text" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
               </div>
               <div>
                 <label class="block text-sm font-medium text-text-main mb-1">Author</label>
-                <input v-model="form.author" type="text" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
+                <input v-model.trim="form.author" type="text" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
               </div>
               <div>
                 <label class="block text-sm font-medium text-text-main mb-1">Category</label>
@@ -105,7 +124,7 @@
               </div>
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">Description</label>
-                <textarea v-model="form.description" rows="3" class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary"></textarea>
+                <textarea v-model.trim="form.description" rows="3" class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-primary focus:border-primary"></textarea>
               </div>
               <div class="col-span-1 sm:col-span-2">
                 <label class="block text-sm font-medium text-text-main mb-1">PDF File</label>
@@ -151,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { PlusIcon } from '@lucide/vue'
 import { supabase } from '../../services/supabase'
 
@@ -238,7 +257,20 @@ const fetchBooks = async (isLoadMore = false) => {
   loadingMore.value = false
 }
 
-onMounted(() => fetchBooks())
+onMounted(() => {
+  fetchBooks()
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && showUploadModal.value) {
+    closeModal()
+  }
+}
 
 const handleCoverChange = (e: Event) => {
   const target = e.target as HTMLInputElement

@@ -11,11 +11,15 @@
           <SearchIcon class="h-4 w-4 text-gray-400" />
         </div>
         <input
-          v-model="libraryStore.searchQuery"
+          v-model="localSearchQuery"
+          @input="debouncedSearch"
           type="text"
           placeholder="Search books or authors..."
-          class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary sm:text-sm transition-all"
+          class="block w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary sm:text-sm transition-all"
         />
+        <button v-if="localSearchQuery" @click="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors" aria-label="Clear Search">
+          <XIcon class="h-4 w-4" />
+        </button>
       </div>
     </div>
 
@@ -160,12 +164,35 @@ import { SearchIcon, BellIcon, ChevronDownIcon, LogOutIcon, KeyIcon, XIcon, EyeI
 import { useAuthStore } from '../../stores/auth'
 import { useLibraryStore } from '../../stores/library'
 import { useRouter } from 'vue-router'
+import { watch } from 'vue'
 
 defineEmits(['toggle-sidebar'])
 
 const authStore = useAuthStore()
 const libraryStore = useLibraryStore()
 const router = useRouter()
+
+// Debounced Search
+const localSearchQuery = ref(libraryStore.searchQuery)
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+
+const debouncedSearch = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    libraryStore.searchQuery = localSearchQuery.value
+  }, 300)
+}
+
+const clearSearch = () => {
+  localSearchQuery.value = ''
+  libraryStore.searchQuery = ''
+}
+
+watch(() => libraryStore.searchQuery, (newVal) => {
+  if (localSearchQuery.value !== newVal) {
+    localSearchQuery.value = newVal
+  }
+})
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
