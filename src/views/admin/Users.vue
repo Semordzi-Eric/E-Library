@@ -73,6 +73,7 @@
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white z-10 border-l border-gray-50">
               <div class="flex items-center justify-end gap-3">
                 <button @click="openActivityModal(profile)" class="text-primary hover:text-primary-dark transition-colors font-semibold">View Activity</button>
+                <button @click="openResetPasswordModal(profile)" class="text-orange-500 hover:text-orange-700 transition-colors font-semibold">Reset Password</button>
                 <button @click="deleteProfile(profile.id)" class="text-red-600 hover:text-red-900 transition-colors">Remove</button>
               </div>
             </td>
@@ -178,6 +179,51 @@
         </div>
       </div>
     </div>
+    <!-- Reset Password Modal -->
+    <div v-if="showResetPasswordModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="reset-modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeResetPasswordModal"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div class="inline-block align-bottom bg-surface rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+          <div class="bg-surface px-6 pt-5 pb-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg leading-6 font-bold text-text-main" id="reset-modal-title">
+              Reset Password for {{ resetPasswordTarget?.name }}
+            </h3>
+            <button @click="closeResetPasswordModal" class="text-gray-400 hover:text-gray-500 transition-colors">
+              <XIcon class="w-5 h-5" />
+            </button>
+          </div>
+          
+          <form @submit.prevent="submitPasswordReset" class="p-6">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">New Temporary Password</label>
+              <input 
+                v-model="newPassword" 
+                type="text" 
+                required 
+                minlength="8"
+                placeholder="e.g., ChangeMe123!" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none transition-all"
+              />
+              <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters. The user should change this after logging in.</p>
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-6">
+              <button type="button" @click="closeResetPasswordModal" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+              <button type="submit" :disabled="resettingPassword || newPassword.length < 8" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                <span v-if="resettingPassword">
+                  <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  Resetting...
+                </span>
+                <span v-else>Reset Password</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -205,6 +251,12 @@ const activeTab = ref('sessions')
 const loadingActivity = ref(false)
 const userSessions = ref<any[]>([])
 const userLogs = ref<any[]>([])
+
+// Reset Password State
+const showResetPasswordModal = ref(false)
+const resetPasswordTarget = ref<any>(null)
+const newPassword = ref('')
+const resettingPassword = ref(false)
 
 const handleSearch = () => {
   clearTimeout(searchTimeout)
@@ -352,5 +404,39 @@ const downloadCsv = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+const openResetPasswordModal = (profile: any) => {
+  resetPasswordTarget.value = profile
+  // Generate a simple default password
+  newPassword.value = Math.random().toString(36).slice(-8) + '!' 
+  showResetPasswordModal.value = true
+}
+
+const closeResetPasswordModal = () => {
+  showResetPasswordModal.value = false
+  resetPasswordTarget.value = null
+  newPassword.value = ''
+}
+
+const submitPasswordReset = async () => {
+  if (!resetPasswordTarget.value || newPassword.value.length < 8) return
+
+  try {
+    resettingPassword.value = true
+    const { error } = await supabase.rpc('admin_reset_password', {
+      p_user_id: resetPasswordTarget.value.id,
+      p_new_password: newPassword.value
+    })
+
+    if (error) throw error
+
+    toastStore.success(`Password for ${resetPasswordTarget.value.name} has been reset successfully.`)
+    closeResetPasswordModal()
+  } catch (error: any) {
+    toastStore.error("Failed to reset password: " + error.message)
+  } finally {
+    resettingPassword.value = false
+  }
 }
 </script>
