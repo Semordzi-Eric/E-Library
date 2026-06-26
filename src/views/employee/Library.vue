@@ -1,15 +1,16 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-text-main">Company Library</h2>
+      <h2 class="text-2xl font-bold text-text-main">Korba Library</h2>
       <div class="flex items-center gap-3">
         <select v-model="selectedCategory" class="border border-gray-300 rounded-lg text-sm py-2 px-3 bg-surface focus:ring-primary focus:border-primary">
           <option value="">All Categories</option>
+          <option value="Personal Development">Personal Development</option>
           <option value="Leadership">Leadership</option>
-          <option value="HR Policies">HR Policies</option>
-          <option value="Compliance">Compliance</option>
-          <option value="Technology">Technology</option>
+          <option value="Productivity">Productivity</option>
           <option value="Finance">Finance</option>
+          <option value="Wellness">Wellness</option>
+          <option value="Career Growth">Career Growth</option>
         </select>
         <select v-model="selectedSort" class="border border-gray-300 rounded-lg text-sm py-2 px-3 bg-surface focus:ring-primary focus:border-primary">
           <option value="recent">Most Recent</option>

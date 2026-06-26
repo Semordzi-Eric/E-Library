@@ -76,6 +76,7 @@
       <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
         <h3 class="text-base font-bold text-text-main">System Event Log</h3>
         <div class="flex items-center gap-2">
+          <input v-model="searchQuery" type="text" placeholder="Search logs..." class="border border-gray-300 rounded-lg text-xs py-1.5 px-2.5 bg-white focus:ring-primary focus:border-primary w-48">
           <select v-model="filterAction" class="border border-gray-300 rounded-lg text-xs py-1.5 px-2.5 bg-white focus:ring-primary focus:border-primary">
             <option value="">All Actions</option>
             <option value="LOGIN">Logins</option>
@@ -140,6 +141,7 @@ const isRefreshing = ref(false)
 const logs = ref<any[]>([])
 const sessions = ref<any[]>([])
 const filterAction = ref('')
+const searchQuery = ref('')
 
 const fetchLogs = async () => {
   loadingLogs.value = true
@@ -174,8 +176,19 @@ const refreshAll = async () => {
 onMounted(() => refreshAll())
 
 const filteredLogs = computed(() => {
-  if (!filterAction.value) return logs.value
-  return logs.value.filter(l => l.action === filterAction.value)
+  let result = logs.value
+  if (filterAction.value) {
+    result = result.filter(l => l.action === filterAction.value)
+  }
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(l => 
+      (l.profiles?.name || '').toLowerCase().includes(q) ||
+      (l.profiles?.department || '').toLowerCase().includes(q) ||
+      (l.resource || '').toLowerCase().includes(q)
+    )
+  }
+  return result
 })
 
 const getInitials = (name?: string) => {

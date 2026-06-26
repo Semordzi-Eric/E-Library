@@ -95,11 +95,12 @@
               <div>
                 <label class="block text-sm font-medium text-text-main mb-1">Category</label>
                 <select v-model="form.category" required class="block w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-primary focus:border-primary">
+                  <option value="Personal Development">Personal Development</option>
                   <option value="Leadership">Leadership</option>
-                  <option value="HR Policies">HR Policies</option>
-                  <option value="Compliance">Compliance</option>
-                  <option value="Technology">Technology</option>
+                  <option value="Productivity">Productivity</option>
                   <option value="Finance">Finance</option>
+                  <option value="Wellness">Wellness</option>
+                  <option value="Career Growth">Career Growth</option>
                 </select>
               </div>
               <div class="col-span-1 sm:col-span-2">
@@ -178,7 +179,7 @@ const coverPreviewUrl = ref('')
 const form = ref({
   title: '',
   author: '',
-  category: 'Leadership',
+  category: 'Personal Development',
   description: '',
   allowDownload: false
 })
@@ -320,7 +321,7 @@ const extractPdfInfo = async (file: File) => {
 const closeModal = () => {
   showUploadModal.value = false
   uploadError.value = ''
-  form.value = { title: '', author: '', category: 'Leadership', description: '', allowDownload: false }
+  form.value = { title: '', author: '', category: 'Personal Development', description: '', allowDownload: false }
   coverFile.value = null
   pdfFile.value = null
   isExtracting.value = false

@@ -22,10 +22,31 @@
     <!-- Right side -->
     <div class="flex items-center gap-3 ml-6">
       <!-- Notification bell -->
-      <button class="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all relative">
-        <BellIcon class="h-5 w-5" />
-        <span class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-      </button>
+      <div class="relative" ref="notifDropdownRef">
+        <button @click="notifDropdownOpen = !notifDropdownOpen" class="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:scale-90 active:bg-gray-200 rounded-lg transition-all relative">
+          <BellIcon class="h-5 w-5" />
+          <span v-if="unreadNotifs" class="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+        </button>
+
+        <Transition name="dropdown">
+          <div v-if="notifDropdownOpen" class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden z-50">
+            <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="text-sm font-bold text-gray-900">Notifications</h3>
+              <button v-if="unreadNotifs" @click="markAllRead" class="text-xs text-primary hover:text-primary-dark font-medium">Mark all read</button>
+            </div>
+            
+            <div class="max-h-80 overflow-y-auto">
+              <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-gray-500 text-sm">
+                No new notifications.
+              </div>
+              <div v-for="notif in notifications" :key="notif.id" class="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors" :class="{ 'bg-blue-50/50': !notif.read }">
+                <p class="text-sm text-gray-900" :class="{ 'font-semibold': !notif.read }">{{ notif.message }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ notif.time }}</p>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </div>
 
       <!-- User avatar + dropdown -->
       <div class="relative" ref="dropdownRef">
@@ -160,8 +181,33 @@ const handleClickOutside = (e: MouseEvent) => {
     dropdownOpen.value = false
   }
 }
-onMounted(() => document.addEventListener('mousedown', handleClickOutside))
-onUnmounted(() => document.removeEventListener('mousedown', handleClickOutside))
+
+// Notification State
+const notifDropdownOpen = ref(false)
+const notifDropdownRef = ref<HTMLElement | null>(null)
+const notifications = ref([
+  { id: 1, message: 'Welcome to Korba E-Library!', time: 'Just now', read: false },
+  { id: 2, message: 'Explore our new self-help books collection.', time: '1 hour ago', read: false }
+])
+const unreadNotifs = computed(() => notifications.value.some(n => !n.read))
+const markAllRead = () => {
+  notifications.value.forEach(n => n.read = true)
+}
+
+const handleClickOutsideNotif = (e: MouseEvent) => {
+  if (notifDropdownRef.value && !notifDropdownRef.value.contains(e.target as Node)) {
+    notifDropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
+  document.addEventListener('mousedown', handleClickOutsideNotif)
+})
+onUnmounted(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+  document.removeEventListener('mousedown', handleClickOutsideNotif)
+})
 
 const handleLogout = async () => {
   dropdownOpen.value = false
