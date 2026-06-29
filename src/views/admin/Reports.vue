@@ -1,7 +1,25 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <h2 class="text-2xl font-bold text-text-main">Platform Reports</h2>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm">
+          <CalendarIcon class="w-4 h-4 text-gray-500" />
+          <input type="date" v-model="startDate" class="text-sm outline-none text-gray-700 bg-transparent" />
+          <span class="text-gray-400 text-sm">to</span>
+          <input type="date" v-model="endDate" class="text-sm outline-none text-gray-700 bg-transparent" />
+        </div>
+        
+        <button @click="fetchData" class="flex items-center gap-2 text-sm bg-primary text-white hover:bg-primary-dark transition-colors px-4 py-1.5 rounded-lg shadow-sm font-medium">
+          <FilterIcon class="w-4 h-4" />
+          Filter
+        </button>
+        
+        <button @click="downloadReport" class="flex items-center gap-2 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium shadow-sm ml-2">
+          <DownloadIcon class="w-4 h-4" />
+          Export Report
+        </button>
+      </div>
     </div>
 
     <!-- Overview Stats -->
@@ -85,6 +103,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { CalendarIcon, FilterIcon, DownloadIcon } from '@lucide/vue'
 import { supabase } from '../../services/supabase'
 import { Bar, Pie, Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, LineElement, PointElement } from 'chart.js'
@@ -104,6 +123,9 @@ const barChartData = ref<any>(null)
 const lineChartData = ref<any>(null)
 const deptChartData = ref<any>(null)
 const topReaders = ref<any[]>([])
+
+const startDate = ref('')
+const endDate = ref('')
 
 const formatTime = (seconds: number) => {
   if (!seconds) return '0h 0m'
@@ -132,7 +154,7 @@ const lineOptions = {
   }
 }
 
-onMounted(async () => {
+const fetchData = async () => {
   loading.value = true
   
   // Fetch overall counts
@@ -142,12 +164,26 @@ onMounted(async () => {
   const { count: pCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
   totalUsers.value = pCount || 0
   
-  const { count: sCount } = await supabase.from('reading_sessions').select('*', { count: 'exact', head: true })
+  let sQuery = supabase.from('reading_sessions').select('*', { count: 'exact', head: true })
+  let dataQuery = supabase.from('reading_sessions').select('*, profiles(name, department)')
+
+  if (startDate.value) {
+    sQuery = sQuery.gte('start_time', new Date(startDate.value).toISOString())
+    dataQuery = dataQuery.gte('start_time', new Date(startDate.value).toISOString())
+  }
+  if (endDate.value) {
+    const end = new Date(endDate.value)
+    end.setHours(23, 59, 59, 999)
+    sQuery = sQuery.lte('start_time', end.toISOString())
+    dataQuery = dataQuery.lte('start_time', end.toISOString())
+  }
+
+  const { count: sCount } = await sQuery
   totalSessions.value = sCount || 0
   
   // Fetch book metrics for charts
   const { data: books } = await supabase.from('books').select('id, title, category')
-  const { data: sessions } = await supabase.from('reading_sessions').select('*, profiles(name, department)')
+  const { data: sessions } = await dataQuery
   
   if (books && sessions) {
     // 1. Compute summary stats from sessions
@@ -238,5 +274,36 @@ onMounted(async () => {
   }
   
   loading.value = false
+}
+
+onMounted(() => {
+  fetchData()
 })
+
+const downloadReport = () => {
+  let csvContent = "data:text/csv;charset=utf-8,\n"
+  csvContent += "Most Active Readers Report\n"
+  if (startDate.value || endDate.value) {
+    csvContent += `Period: ${startDate.value || 'Beginning'} to ${endDate.value || 'Present'}\n`
+  }
+  csvContent += "\nStaff Name,Department,Sessions,Time Spent (s)\n"
+  
+  topReaders.value.forEach(r => {
+    const row = [
+      `"${(r.name || 'Unknown').replace(/"/g, '""')}"`,
+      `"${(r.department || '').replace(/"/g, '""')}"`,
+      r.sessions,
+      r.time
+    ].join(',')
+    csvContent += row + "\n"
+  })
+
+  const encodedUri = encodeURI(csvContent)
+  const link = document.createElement("a")
+  link.setAttribute("href", encodedUri)
+  link.setAttribute("download", `reports_summary_${new Date().toISOString().split('T')[0]}.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 </script>
