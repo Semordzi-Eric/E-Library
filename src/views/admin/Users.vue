@@ -328,12 +328,12 @@ const fetchProfiles = async (isLoadMore = false) => {
     const profileIds = data.map(p => p.id)
     const { data: sessions } = await supabase
       .from('reading_sessions')
-      .select('user_id, duration')
+      .select('user_id, duration, time_spent_seconds')
       .in('user_id', profileIds)
 
     const profilesWithStats = data.map(p => {
       const userSessions = sessions?.filter(s => s.user_id === p.id) || []
-      const totalTime = userSessions.reduce((acc, curr) => acc + (curr.duration || 0), 0)
+      const totalTime = userSessions.reduce((acc, curr) => acc + (curr.time_spent_seconds || curr.duration || 0), 0)
       return {
         ...p,
         booksStarted: userSessions.length,
