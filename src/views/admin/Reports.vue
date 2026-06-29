@@ -101,7 +101,6 @@ const totalReadingTime = ref(0)
 const avgCompletion = ref(0)
 
 const barChartData = ref<any>(null)
-const pieChartData = ref<any>(null)
 const lineChartData = ref<any>(null)
 const deptChartData = ref<any>(null)
 const topReaders = ref<any[]>([])
