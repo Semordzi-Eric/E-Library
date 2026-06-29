@@ -53,17 +53,17 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-2">
                   <div class="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-500 rounded-full" :style="{ width: `${session.completion_percentage || 0}%` }"></div>
+                    <div class="h-full bg-blue-500 rounded-full" :style="{ width: `${session.progress_percentage || session.completion_percentage || 0}%` }"></div>
                   </div>
-                  <span class="text-xs font-medium text-gray-700">{{ session.completion_percentage || 0 }}%</span>
+                  <span class="text-xs font-medium text-gray-700">{{ session.progress_percentage || session.completion_percentage || 0 }}%</span>
                 </div>
-                <p class="text-xs text-gray-400 mt-0.5">Pg. {{ session.pages_visited && session.pages_visited.length > 0 ? Math.max(...session.pages_visited) : 1 }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">Pg. {{ session.current_page || (session.pages_visited && session.pages_visited.length > 0 ? Math.max(...session.pages_visited) : 1) }}</p>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-medium text-gray-900">{{ formatTime(session.duration) }}</span>
+                <span class="text-sm font-medium text-gray-900">{{ formatTime(session.time_spent_seconds || session.duration || 0) }}</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ formatDate(session.start_time) }}
+                {{ formatDate(session.last_read_at || session.start_time) }}
               </td>
             </tr>
           </tbody>

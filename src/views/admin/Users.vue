@@ -161,14 +161,14 @@
                   <tr v-if="userSessions.length === 0"><td colspan="4" class="py-8 text-center text-sm text-gray-500">No reading sessions recorded.</td></tr>
                   <tr v-for="s in userSessions" :key="s.id" class="hover:bg-gray-50 transition-colors">
                     <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ s.books?.title || 'Unknown Book' }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">{{ new Date(s.start_time).toLocaleString() }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">{{ formatTime(s.duration) }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500">{{ new Date(s.last_read_at || s.start_time).toLocaleString() }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500">{{ formatTime(s.time_spent_seconds || s.duration || 0) }}</td>
                     <td class="px-4 py-3 text-sm text-gray-500">
                       <div class="flex items-center gap-2">
                         <div class="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div class="h-full bg-primary rounded-full" :style="{ width: `${s.completion_percentage || 0}%` }"></div>
+                          <div class="h-full bg-primary rounded-full" :style="{ width: `${s.progress_percentage || s.completion_percentage || 0}%` }"></div>
                         </div>
-                        <span>{{ s.completion_percentage || 0 }}%</span>
+                        <span>{{ s.progress_percentage || s.completion_percentage || 0 }}%</span>
                       </div>
                     </td>
                   </tr>
@@ -419,9 +419,9 @@ const downloadCsv = () => {
     userSessions.value.forEach(s => {
       const row = [
         `"${(s.books?.title || '').replace(/"/g, '""')}"`,
-        `"${new Date(s.start_time).toLocaleString()}"`,
-        s.duration || 0,
-        s.completion_percentage || 0
+        `"${new Date(s.last_read_at || s.start_time).toLocaleString()}"`,
+        s.time_spent_seconds || s.duration || 0,
+        s.progress_percentage || s.completion_percentage || 0
       ].join(',')
       csvContent += row + "\n"
     })
