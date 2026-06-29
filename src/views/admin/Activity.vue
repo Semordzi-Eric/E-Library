@@ -1,18 +1,39 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <h2 class="text-2xl font-bold text-text-main">Staff Activity</h2>
-      <button @click="refreshAll" class="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors">
-        <RefreshCwIcon class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
-        Refresh
-      </button>
+      
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm">
+          <CalendarIcon class="w-4 h-4 text-gray-500" />
+          <input type="date" v-model="startDate" class="text-sm outline-none text-gray-700 bg-transparent" />
+          <span class="text-gray-400 text-sm">to</span>
+          <input type="date" v-model="endDate" class="text-sm outline-none text-gray-700 bg-transparent" />
+        </div>
+        
+        <button @click="refreshAll" class="flex items-center gap-2 text-sm bg-primary text-white hover:bg-primary-dark transition-colors px-4 py-1.5 rounded-lg shadow-sm font-medium">
+          <FilterIcon class="w-4 h-4" :class="{ 'animate-pulse': isRefreshing }" />
+          Filter
+        </button>
+        
+        <button @click="refreshAll" class="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-2 py-1.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:bg-gray-50">
+          <RefreshCwIcon class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
+          Refresh
+        </button>
+      </div>
     </div>
 
     <!-- Reading Sessions Table -->
     <div class="bg-surface border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-        <h3 class="text-base font-bold text-text-main">Reading Sessions</h3>
-        <span class="text-xs text-gray-500">{{ sessions.length }} records</span>
+      <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <h3 class="text-base font-bold text-text-main">Reading Sessions</h3>
+          <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{{ sessions.length }} records</span>
+        </div>
+        <button @click="downloadSessionsCsv" class="flex items-center gap-2 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium shadow-sm">
+          <DownloadIcon class="w-4 h-4" />
+          Export Sessions
+        </button>
       </div>
 
       <div v-if="loadingSessions" class="p-8 text-center text-gray-500">
@@ -73,9 +94,9 @@
 
     <!-- Audit Log Table -->
     <div class="bg-surface border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+      <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
         <h3 class="text-base font-bold text-text-main">System Event Log</h3>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <input v-model="searchQuery" type="text" placeholder="Search logs..." class="border border-gray-300 rounded-lg text-xs py-1.5 px-2.5 bg-white focus:ring-primary focus:border-primary w-48">
           <select v-model="filterAction" class="border border-gray-300 rounded-lg text-xs py-1.5 px-2.5 bg-white focus:ring-primary focus:border-primary">
             <option value="">All Actions</option>
@@ -84,7 +105,11 @@
             <option value="READ_END">Read Ended</option>
             <option value="PAGE_TURN">Page Turns</option>
           </select>
-          <span class="text-xs text-gray-500">{{ filteredLogs.length }} entries</span>
+          <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{{ filteredLogs.length }} entries</span>
+          <button @click="downloadLogsCsv" class="flex items-center gap-2 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium shadow-sm ml-2">
+            <DownloadIcon class="w-4 h-4" />
+            Export Logs
+          </button>
         </div>
       </div>
 
@@ -132,7 +157,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { RefreshCwIcon, Loader2Icon } from '@lucide/vue'
+import { RefreshCwIcon, Loader2Icon, CalendarIcon, DownloadIcon, FilterIcon } from '@lucide/vue'
 import { supabase } from '../../services/supabase'
 
 const loadingLogs = ref(true)
@@ -143,13 +168,27 @@ const sessions = ref<any[]>([])
 const filterAction = ref('')
 const searchQuery = ref('')
 
+const startDate = ref('')
+const endDate = ref('')
+
 const fetchLogs = async () => {
   loadingLogs.value = true
-  const { data, error } = await supabase
+  let query = supabase
     .from('audit_logs')
     .select('*, profiles(name, department)')
     .order('timestamp', { ascending: false })
-    .limit(200)
+    .limit(500)
+
+  if (startDate.value) {
+    query = query.gte('timestamp', new Date(startDate.value).toISOString())
+  }
+  if (endDate.value) {
+    const end = new Date(endDate.value)
+    end.setHours(23, 59, 59, 999)
+    query = query.lte('timestamp', end.toISOString())
+  }
+
+  const { data, error } = await query
   if (data) logs.value = data
   if (error) console.error('Error fetching logs:', error)
   loadingLogs.value = false
@@ -157,11 +196,22 @@ const fetchLogs = async () => {
 
 const fetchSessions = async () => {
   loadingSessions.value = true
-  const { data, error } = await supabase
+  let query = supabase
     .from('reading_sessions')
     .select('*, profiles(name, department), books(title, category)')
     .order('start_time', { ascending: false })
-    .limit(100)
+    .limit(500)
+
+  if (startDate.value) {
+    query = query.gte('start_time', new Date(startDate.value).toISOString())
+  }
+  if (endDate.value) {
+    const end = new Date(endDate.value)
+    end.setHours(23, 59, 59, 999)
+    query = query.lte('start_time', end.toISOString())
+  }
+
+  const { data, error } = await query
   if (data) sessions.value = data
   if (error) console.error('Error fetching sessions:', error)
   loadingSessions.value = false
@@ -221,5 +271,53 @@ const actionBadge = (action: string) => {
     DOWNLOAD: 'bg-red-100 text-red-800',
   }
   return map[action] || 'bg-gray-100 text-gray-700'
+}
+
+const downloadSessionsCsv = () => {
+  let csvContent = "data:text/csv;charset=utf-8,\n"
+  csvContent += "Staff Name,Department,Book Title,Category,Progress,Time Spent (s),Last Active\n"
+  
+  sessions.value.forEach(s => {
+    const row = [
+      `"${(s.profiles?.name || 'Unknown').replace(/"/g, '""')}"`,
+      `"${(s.profiles?.department || '').replace(/"/g, '""')}"`,
+      `"${(s.books?.title || 'Unknown Book').replace(/"/g, '""')}"`,
+      `"${(s.books?.category || '').replace(/"/g, '""')}"`,
+      `${s.progress_percentage || s.completion_percentage || 0}%`,
+      s.time_spent_seconds || s.duration || 0,
+      `"${formatDate(s.last_read_at || s.start_time)}"`
+    ].join(',')
+    csvContent += row + "\n"
+  })
+
+  downloadFile(csvContent, `reading_sessions_${new Date().toISOString().split('T')[0]}.csv`)
+}
+
+const downloadLogsCsv = () => {
+  let csvContent = "data:text/csv;charset=utf-8,\n"
+  csvContent += "Time,Staff Name,Department,Action,Details\n"
+  
+  filteredLogs.value.forEach(l => {
+    const row = [
+      `"${formatDate(l.timestamp)}"`,
+      `"${(l.profiles?.name || 'Unknown').replace(/"/g, '""')}"`,
+      `"${(l.profiles?.department || '').replace(/"/g, '""')}"`,
+      `"${l.action}"`,
+      `"${(l.resource || '').replace(/"/g, '""')}"`
+    ].join(',')
+    csvContent += row + "\n"
+  })
+
+  downloadFile(csvContent, `system_logs_${new Date().toISOString().split('T')[0]}.csv`)
+}
+
+const downloadFile = (content: string, filename: string) => {
+  const encodedUri = encodeURI(content)
+  const link = document.createElement("a")
+  link.setAttribute("href", encodedUri)
+  link.setAttribute("download", filename)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 </script>
